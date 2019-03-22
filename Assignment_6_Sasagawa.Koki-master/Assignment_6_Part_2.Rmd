@@ -1,0 +1,259 @@
+_Score:_ 5.75/6.5
+# Assignment 6 RNAseq PArt 2
+
+Student Name: Koki Sasagawa
+Student ID: 999054646
+
+Insert your answers below.  Knit this file and submit the .Rmd and .html when you are done.  Open an issue indicating that the assignment is ready to be graded.
+
+After finding differentially expressed genes, we want to find their specific functions. 
+
+Download the file by typing the following in command line
+```
+wget http://www.g3journal.org/content/suppl/2014/08/12/g3.114.012526.DC1/FileS9.txt
+
+#move it into Brapa_reference folder
+mv ~/Files9.txt ~/Assignments/Assignment_6_Sasagawa.Koki/Brapa_reference
+```
+
+__Exercise 1__:  
+__a.__ Use `merge()` to add gene descriptions for the genes found to be regulated by the DP treatment.  Output a table of the top 10 genes that includes the output from edgeR and the descriptions.  __Important: Pay attention to the "sort="" argument to `merge()`.  Should it be TRUE or FALSE?
+```{r}
+#read in files
+gene_annotation <- read.delim("./Brapa_reference/FileS9.txt", header = FALSE)
+
+DEgenes.trt <- read.csv("./DEgenes.trt.csv", header = TRUE)
+
+#Check
+head(gene_annotation)
+head(DEgenes.trt)
+
+#Add column names to gene_annotation
+colnames(gene_annotation) <- c("X", "GO")
+
+#Merge the gene annotation files with the genes found to be regulated by the DP treatment
+#We do not want to use sort as the data frame has the genes in order from most differentially expressed. 
+DEgenes.trt.anno <- merge(DEgenes.trt, gene_annotation, by="X", sort=FALSE)
+
+#Rename Columns
+colnames(DEgenes.trt.anno)[1] <- "geneID"
+colnames(DEgenes.trt.anno)[7] <- "GO_annotation"
+
+#Display Top 10 genes
+head(DEgenes.trt.anno, n = 10)
+```
+
+__b.__ Repeat this for  genes with a genotype x trt interaction.
+```{r}
+#read in files
+DEgenes.gt.trt <- read.csv("./DEgenes.gt.trt.csv", header = TRUE)
+
+#Check
+head(DEgenes.gt.trt)
+
+#Merge the gene annotation files with the differentially expressed genes
+DEgenes.gt.trt.anno <- merge(DEgenes.gt.trt, gene_annotation, by="X", sort=FALSE)
+
+#Rename Columns
+colnames(DEgenes.gt.trt.anno)[1] <- "geneID"
+colnames(DEgenes.gt.trt.anno)[7] <- "GO_annotation"
+
+#Display Top 10 genes
+head(DEgenes.gt.trt.anno, n = 10)
+```
+
+__Exercise 2__:  
+There might be an enrichment for cell wall related genes. See if there is a statistical over-representation of particular Gene Ontology (GO) terms in this set of genes. Is the prevalence of a term in our gene set of interest higher than its prevalence in the rest of the genome?
+
+Download GO annotation and gene length for B.rapa, and Expressed genes 
+```
+#GO terms
+wget http://www.g3journal.org/content/suppl/2014/08/12/g3.114.012526.DC1/FileS11.txt
+#Gene Length
+wget http://jnmaloof.github.io/BIS180L_web/data/Brapa_CDS_lengths.txt
+#Expressed genes
+wget http://jnmaloof.github.io/BIS180L_web/data/internode_expressed_genes.txt
+```
+
+Get the Data
+```{r}
+library(goseq)
+go.terms <- read.delim("./Brapa_reference/FileS11.txt",header=FALSE,as.is=TRUE)
+head(go.terms)
+names(go.terms) <- c("GeneID","GO")
+summary(go.terms)
+
+expressed.genes <- read.delim("./internode_expressed_genes.txt",as.is=TRUE)
+head(expressed.genes)
+names(expressed.genes) <- "GeneID"
+
+gene.lengths <- read.table("./Brapa_reference/Brapa_CDS_lengths.txt",as.is=TRUE)
+head(gene.lengths)
+summary(gene.lengths)
+
+#we need to reduce the gene.length data to only contain entries for those genes in our expressed.genes set.  We also need this as a vector
+gene.lengths.vector <- gene.lengths$Length[gene.lengths$GeneID %in% expressed.genes$GeneID]
+names(gene.lengths.vector) <- gene.lengths$GeneID[gene.lengths$GeneID %in% expressed.genes$GeneID]
+head(gene.lengths.vector)
+
+#Do the reverse to make sure everything matches up (it seems that we don't have length info for some genes?)
+expressed.genes.match <- expressed.genes[expressed.genes$GeneID %in% names(gene.lengths.vector),]
+
+```
+
+Format go.terms for goseq. Want them in list format, and we need to separate into separate elements
+```{r}
+go.list <- strsplit(go.terms$GO,split=",")
+names(go.list) <- go.terms$GeneID
+head(go.list)
+```
+Format gene expression data for goseq. We need a vector for each gene with 1 indicatig differential expression and 0 indicating no differential expression. 
+```{r}
+DE.interaction <- expressed.genes.match %in% DEgenes.gt.trt.anno[,"geneID"] 
+    #for each gene in expressed gene, return FALSE if it is not in DEgene.trt and TRUE if it is.
+names(DE.interaction) <- expressed.genes.match
+head(DE.interaction)
+DE.interaction <- as.numeric(DE.interaction) #convert to 0s and 1s
+head(DE.interaction)
+sum(DE.interaction) # number of DE genes
+```
+Calculate over-representation by looking for GO enrichment
+```{r}
+#determines if there is bias due to gene length.  The plot shows the relationship.
+nullp.result <- nullp(DEgenes = DE.interaction,bias.data = gene.lengths.vector)
+
+#calculate p-values for each GO term
+rownames(nullp.result) <- names(gene.lengths.vector) #because of a bug in nullp()
+GO.out <- goseq(pwf = nullp.result,gene2cat = go.list,test.cats=("GO:BP"))
+
+#list over-represented GO terms (p < 0.05)
+GO.out[GO.out$over_represented_pvalue < 0.05,]
+```
+
+```{r}
+write.table(GO.out[GO.out$over_represented_pvalue < 0.05,1:2],row.names=FALSE,file="GO_terms.txt", quote = FALSE,col.names = FALSE)
+```
+
+__a:__ In REVIGO display a "TreeMap" of the BP GO terms.  Was our hypothesis that cell wall genes are enriched in the genotype X treatment gene set correct?  You DO NOT need to include the treemap in your answer.
+
+> Finding the total of percentage increase of expression in genes invovled with cell wall organization we see a 10% increase in the treatment. Our hypothesis is thus correct.
+
+__b:__ Display a "TreeMap" of the CC GO terms.  There are four general categories shown, some with sub-categories.  What are the two general categories with the largest number of sub categories?  How might these general categories relate to differences in plant growth?  You DO NOT need to include the treemap in your answer.
+
+> The two general categories with the largest number of subcategories are endoplasmic reticulum membrane and cell wall. The plants with treatment may have increase rate of plant growth as the genes in endoplasmic reticulum membrane are overexpressed, which may have effect on protein production and other processes. The genes related to cell wall is also overexpressed, which is related to plant growth as well. 
+
+__Exercise 3__ :  
+Promoter motif enrichment helps us understand what causes genes to be differentially expressed. First we must get the sequence of the promoters. For ease we will define the promoters as the 1000bp upstream of the start of the gene.
+
+To get gene "promoters"
+```
+extract-utr.pl --gff_file=Brapa_gene_v1.5.gff \
+--genome_fa_file=BrapaV1.5_chrom_only.fa  \
+--cds_fa_file=Brassica_rapa_final_CDS.fa  \
+--fiveprime --utr_length=1000 --gene_length=0 \
+--output_fa_file=BrapaV1.5_1000bp_upstream.fa
+```
+
+load promoter sequences
+```{r}
+library(Biostrings) #R package for handling DNA and protein data
+promoters <- readDNAStringSet("./Brapa_reference/BrapaV1.5_1000bp_upstream.fa")
+
+#convert "N" to "-" in promoters.  otherwise motifs will match strings of "N"s
+promoters <- DNAStringSet(gsub("N","-",promoters))
+
+promoters
+```
+
+Load the motifs and convert to a good format for R
+```{r}
+motifs <- read.delim("./Brapa_reference/element_name_and_motif_IUPACsupp.txt",header=FALSE,as.is=TRUE)
+head(motifs)
+motifsV <- as.character(motifs[,2])
+names(motifsV) <- motifs[,1]
+motifsSS <- DNAStringSet(motifsV)
+motifsSS
+```
+
+Next we need to subset the promoters into those in our DE genes and those in the "Univserse"
+```{r}
+#get names to match...there are are few names in the DEgene list not in the promoter set
+DEgene.interaction.match <- DEgenes.gt.trt$X[DEgenes.gt.trt$X %in% names(promoters)]
+
+#subset promoter files
+universe.promoters <- promoters[expressed.genes.match]
+target.promoters <- promoters[DEgene.interaction.match]
+```
+Look for over-represented motifs
+```{r}
+#create a function to summarize the results and test for significance
+motifEnrichment <- function(target.promoters,universe.promoters,all.counts=F,motifs=motifsSS) {
+  
+  #use vcountPDict to count the occurrences of each motif in each promoter
+  target.counts <- vcountPDict(motifs,target.promoters,fixed=F) + 
+    vcountPDict(motifsSS,reverseComplement(target.promoters),fixed=F)
+  universe.counts <- vcountPDict(motifs,universe.promoters,fixed=F) + 
+    vcountPDict(motifsSS,reverseComplement(universe.promoters),fixed=F)
+  
+  if (all.counts) { 
+    #count all occurrences of a motif instead of the number of promoters that it occurs in
+    target.counts.sum <- apply(target.counts,1,sum)
+    universe.counts.sum <- apply(universe.counts,1,sum)
+  } else {
+    target.counts.sum <- apply(ifelse(target.counts > 0,1,0),1,sum)
+    universe.counts.sum <- apply(ifelse(universe.counts > 0 , 1, 0),1,sum)
+  }
+  n.motifs <- length(target.counts.sum)
+  results <- vector(mode="numeric",length=n.motifs)
+  for (i in 1:n.motifs) {
+    if (all.counts) { #the contigency tables are different depending on whether we are looking at promoters or overall occurrences
+      #test if ratio of occurrences to promoters is the same in the target and the universe
+      m <- matrix(c(
+        target.counts.sum[i],                       #number of occurrences within target
+        dim(target.counts)[2],                      #number of promoters in target
+        universe.counts.sum[i],                  #number of occurrences within universe
+        dim(universe.counts)[2]                  #number of promoters in universe
+      ),ncol=2)
+    } else { #looking at promoters with and without hits
+      m <- matrix(c(
+        target.counts.sum[i],                        #number of promoters in target with hit
+        dim(target.counts)[2]-target.counts.sum[i],            #number of promoters in target with no hit
+        universe.counts.sum[i],                   #number of promoters in universe with hit
+        dim(universe.counts)[2]-universe.counts.sum[i]   #number of promoters in universe with no hit
+      ),ncol=2)
+    } #else
+    results[i] <- fisher.test(m,alternative="greater")$p.value
+  } #for loop
+  results.table <- data.frame(
+    motif=names(motifs),
+    universe.percent = round(universe.counts.sum/dim(universe.counts)[2],3)*100,
+    target.percent = round(target.counts.sum/dim(target.counts)[2],3)*100,
+    p.value =  results)
+  results.table <- results.table[order(results.table$p.value),]
+  head(results.table)
+}
+
+motif.results <- motifEnrichment(target.promoters,universe.promoters)
+# Show the motifs with p value less than 0.05
+motif.results[motif.results[,"p.value"] < 0.05,]
+```
+
+__a.__ How many motifs are enriched at P < 0.05?  
+
+> 6 motifs are enriched at p < 0.05
+
+*GMT* -0.25 should be 7?
+
+__b.__ What is the identity of the most significantly over-enriched promoter?  
+
+> The most significantly enriched promoter is SORLREP3
+
+__c.__ What percentage of genes in the "Universe" have this motif?  What percentage in our target set?  
+
+> 8.2% of genes in the "universe" have this motif. In our target set 16.2% of the genes have this motif. 
+
+__d.__ You can find information on the motifs [here](http://arabidopsis.med.ohio-state.edu/AtcisDB/bindingsites.html).  Do you think that the most enriched motif represents a biologically meaningful result?  Discuss why or why not.
+
+> Identification of key promoter motifs involved in the network of light-regulated gene expression by combined analysis of genomic sequence and microarray data. The motif that is enriched is biologically meaningful as light is an important stimulus for plant growth. Plants tend to bend and grow towards the direction of light, thus this promoter may regulate genes invovled in growth and cell wall production. 
+
+*GMT* -0.5 how does light relate back to our experimental data?

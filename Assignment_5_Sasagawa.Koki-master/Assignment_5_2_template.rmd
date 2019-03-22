@@ -1,0 +1,189 @@
+_Score:_ 7.0/6
+_Score:_ 7.0/14
+# Assignment_5_2.md
+
+Student Name:Koki Sasagawa  
+Student ID:999054646
+
+Insert answers to R SNP exercises 1 - 4 here.  Submit .Rmd and .html by git.
+
+```{r}
+library(ggplot2)
+vcf.data <- read.table("/home/ubuntu/Assignments/Assignment_5_Sasagawa.Koki/SNP_analysis/IMB211_R500.vcf",as.is=T,na.strings = ".")
+head(vcf.data)
+```
+
+```{r}
+#There is no column heading in the imported file, so we must add it via system() which allows us to issue a command to linux shell
+vcf.header <- system("grep '#C' /home/ubuntu/Assignments/Assignment_5_Sasagawa.Koki/SNP_analysis/IMB211_R500.vcf",intern = TRUE) #might not work on Windows
+vcf.header
+vcf.header <- sub("#","",vcf.header) #get rid of the pound sign
+```
+
+```{r}
+vcf.header <- unlist(strsplit(vcf.header,split="\t"))
+colnames(vcf.data) <- vcf.header
+View(vcf.data)
+```
+
+```{r}
+system("grep '##INFO' /home/ubuntu/Assignments/Assignment_5_Sasagawa.Koki/SNP_analysis/IMB211_R500.vcf")
+
+system("grep '##FORMAT' /home/ubuntu/Assignments/Assignment_5_Sasagawa.Koki/SNP_analysis/IMB211_R500.vcf")
+```
+
+strsplit() splits a character string based at every occurrence of a character. 
+```{r}
+# Before splitting add NAs to blank cells
+
+vcf.data$IMB211[is.na(vcf.data$IMB211)] <- "NA:NA:NA:NA:NA:NA:NA"
+
+IMB211.tmp <- matrix(
+  unlist(strsplit(vcf.data$IMB211,split = ":")),
+  nrow=nrow(vcf.data),
+  byrow=TRUE
+  )
+head(IMB211.tmp)
+colnames(IMB211.tmp) <- paste("IMB211",c("gt","tot.depth","ref.depth","ref.qual","alt.depth","alt.qual","gen.lik"),sep="_")
+
+vcf.data$R500[is.na(vcf.data$R500)] <- "NA:NA:NA:NA:NA:NA:NA"
+
+R500.tmp <- matrix(
+  unlist(strsplit(vcf.data$R500,split = ":")),
+  nrow=nrow(vcf.data),
+  byrow=TRUE
+  )
+head(R500.tmp)
+colnames(R500.tmp) <- paste("R500",c("gt","tot.depth","ref.depth","ref.qual","alt.depth","alt.qual","gen.lik"),sep="_")
+
+vcf.data <- cbind(vcf.data,IMB211.tmp,R500.tmp,stringsAsFactors=FALSE)
+summary(vcf.data)
+```
+
+```{r}
+head(vcf.data)
+vcf.data[,c("IMB211_tot.depth","IMB211_ref.depth","IMB211_ref.qual","IMB211_alt.depth","IMB211_alt.qual",
+            "R500_tot.depth","R500_ref.depth","R500_ref.qual","R500_alt.depth","R500_alt.qual")] <- 
+  apply(vcf.data[,c("IMB211_tot.depth","IMB211_ref.depth","IMB211_ref.qual","IMB211_alt.depth","IMB211_alt.qual",
+            "R500_tot.depth","R500_ref.depth","R500_ref.qual","R500_alt.depth","R500_alt.qual")],
+        2,
+        as.numeric
+        )
+head(vcf.data)
+summary(vcf.data)
+```
+
+**Exercise 1**  
+To explore the quality of our data, make a histogram of genotype quality. It is hard to get a feel for the QUAL scores at the low end, so try making a second histogram that illustrates this region better. (Hint: one option is to subset the data)
+
+First make a graph to get an idea for where the low score cutt off should be made to create a separate histogram
+```{r}
+ggplot(vcf.data, aes(x = vcf.data$QUAL)) + geom_histogram()
+```
+```{r}
+#I defined the limits to QUAL value and adjusted the binwidth to focus on displaying the low QUAL scores in higher resolution. 
+#I am trying out different limits and binwidth to see what is most informative. 
+ggplot(vcf.data, aes(x = vcf.data$QUAL)) + geom_histogram(binwidth = 30) + xlim(0, 1200) 
+
+ggplot(vcf.data, aes(x = vcf.data$QUAL)) + geom_histogram(binwidth = 15) + xlim(0, 500) 
+
+ggplot(vcf.data, aes(x = vcf.data$QUAL)) + geom_histogram(binwidth = 5) + xlim(0, 200) 
+```
+**Exercise 2**  
+We only want to keep positions that have a reasonable probabilty of being correct.
+
+__a__ At a quality of 40 what is the probability that the SNP call is wrong?
+
+> 10log_10prob(call in ALT is wrong)
+The probability the SNP call is wrong is .0001 or .01 %
+
+__b__ Subset the data to only keep positions where the quality score is 40 or greater.
+
+```{r}
+#subset SNPS with quality scores higher than 40
+vcf.data.good <- subset(vcf.data, QUAL >= 40)
+```
+
+```{r}
+#This is the new histogram representing SNPs of good quality. 
+ggplot(vcf.data.good, aes(x = vcf.data.good$QUAL)) + geom_histogram() + xlab("QUAL score")
+```
+
+__c__ What percentage of SNPs were retained?
+
+```{r}
+#count the number of rows in the subsetted data 
+x <- nrow(vcf.data.good)
+
+#Repeat for the original data set
+y <- nrow(vcf.data)
+
+#Calculate the percentage of SNPs retained
+(x / y) * 100
+```
+> 86.62 percent of SNPs were retained. 
+
+We can count the number of homozygous and heterozygous SNPs using table
+```{r}
+table(vcf.data.good$IMB211_gt)
+table(vcf.data.good$R500_gt)
+```
+We can even count the numbers common and unique to each genotype
+```{r}
+#Table representing SNPs in the two cultivars. 
+ftable(vcf.data.good[,c("IMB211_gt","R500_gt")])
+```
+**Exercise 3**  
+__a__ Which SNPS would be most useful for a downstream QTL analysis of F2 progeny generated from a cross of IMB211 and R500? (Ignore the allele categories that have “2”, “3”, or “4”). Hint: you want SNPs that will unambiguously distinguish a locus as coming from IMB211 or R500.
+
+> QTL mapping surveys variation between 2 parents and attemps to find if a loci is associated with a certain phenotype. SNPs that are either 0/0 or 1/1 will be useful for QTL analysis for crossing IMB211 and R500. For generating the cross, one of the parents will have to be 0/0 (homozygous and similar to the reference genome) and the other parent will have to be 1/1 (homozygous and different from the reference genome). This will allow us to obtain homozygous alternate and a homozygous wt in our F2 progeny. 
+
+__b__ Subset the data frame so that you only have these SNPs.
+```{r}
+summary(vcf.data.good)
+```
+
+```{r}
+vcf.data.QTL <- subset(vcf.data.good, (vcf.data.good$IMB211_gt == "1/1" & vcf.data.good$R500_gt == "0/0") | (vcf.data.good$IMB211_gt == "0/0" & vcf.data.good$R500_gt == "1/1"))
+
+summary(vcf.data.QTL)
+```
+
+__c__ How many SNPs are retained?
+
+```{r}
+#Calculate the percent of SNPs that were retained
+a <- nrow(vcf.data.QTL)
+b <- nrow(vcf.data.good)
+
+a
+(a / b) * 100
+
+```
+
+> 17046 SNPs were retained. That is 35.72% of the original SNPs contained in vcf.data.good. 
+
+**Exercise 4**  
+__a__ Using the higher quality SNP list, plot the position along the chromosome of each SNP (x axis), read depth (R500 and IMB211 combined) (y axis).
+Optional: color each SNP for whether it is R500 specific, IMB specific, or common.
+```{r}
+library(reshape2)
+data1 <- vcf.data.good[,c("IMB211_tot.depth", "POS", "R500_tot.depth")]
+data1.melt <- melt(data1, id.var="POS")
+```
+
+```{r}
+ggplot(data1.melt, aes(x = POS, y = value, color = variable)) + geom_point() + xlab("Position") + ylab("Read Depth")
+```
+
+__b__ Use the help function to learn about xlim(). Use this function to plot only the region betweeen 20,000,000 and 25,000,000 bp. Why might there be gaps with no SNPs?
+```{r}
+ggplot(data1.melt, aes(x = POS, y = value, color = variable)) + geom_point() + xlim(20000000, 25000000) + xlab("Position") + ylab("Read Depth")
+```
+
+> The gaps are due to 0/0 which means both R500 and IMB221 are homozygous and similar to the reference genome at that position. 
+
+*GMT* +1 for color coded plot
+
+For Fun (?)–not graded–
+Plot the number of each type of base change (A->G, etc). Are there differences? Is this expected?

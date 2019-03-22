@@ -1,0 +1,389 @@
+---
+title: "Assignment 3"
+output: html_notebook
+---
+
+__Name:__ Koki Sasagawa
+
+__Student ID:__ 999054646
+
+For each of the exercises below, take advantage of R markdown and the notebook features.  That is include the code and have Rstudio embed your answers.  See Exercise 0 for an example
+
+## Exercise 0 (example)
+_Provide the name of your current working directory and list the files therein_
+```{r}
+getwd()
+dir()
+```
+
+(You would then click on the > arrow in your answer code block to run it before continuing)
+
+## Exercise 1
+_Use sum() to determine the sum of numbers from 2000 to 20000.  Provide your code and the actual sum in your answer._
+```{r}
+sum(2000:20000)
+```
+The sum comes out to be **198011000**
+
+## Exercise 2
+```{r}
+#Assigning variables
+a <- 5
+b <- 2:20
+#Printing variables
+a
+b
+```
+_In one or two sentences, describe what the above code snippet it did._  
+The `<-` assigned the values to the variables. `a` now has the value 5 assigned to it and `b` has whole numbers between 2 and 20. 
+
+## Exercise 3
+_Add the contents of a and b together and place the results in a new object.  Examine the result.  Include your code.  Try using both `sum()` and `+`; do you get different results?  If so, why?_  
+```{r}
+#Adding variables using +
+c <- a + b
+
+#Adding variables using sum()
+d <- sum(a, b)
+
+#Print out values assigned to c and d
+c
+d
+```
+Using the `+` added `a` to every element stored in `b`. Using the `sum()` function got the sum of all numberical values within the parenthesis, thus every number 2 - 20 and 5 were added together to give a total value of 214. 
+
+## Exercise 4
+_What is the sum of the 5th through 10th element of object b?  Provide your code and the sum._
+```{r}
+#sum together all values assigned to the 5th through 10th element 
+sum(b[5:10])
+```
+The sum of values 5th and 10th element of object b is 51. 
+
+## Exercise 5
+_What is the sum of the 3rd, 8th, and 10th element of b?  For both of these exercises should only need to have "b" in your code once._
+```{r}
+#sum the 3rd, 8th, and 10th elements of variable b together
+sum(b[c(3, 8, 10)])
+```
+The sum of values 3rd, 8th, and 10th element of object b is 24. 
+
+## Exercise 6
+_When extracting from a 2-dimensional object, which number specifies rows and which specifies columns?_    
+matrix command makes 2-dimensional objects. When extracting from them we must specify both dimensions within squre brackets.
+```{r}
+# Create matrix with values 1 - 25, and a table with 5 columns and orient the insertion of data by row
+m <- matrix(data=1:25,ncol=5,byrow=T)
+m
+m[5,5]
+m[3,]
+```
+The first number specifies the row, and the second specifies the column. In other words: m[nrow, ncol]  
+matrix() accepts 4 things: matrix(data, nrow, ncol, byrow)  
+The data to be inputed, number of rows, number of columns, and the orientation of how the data is inserted into the matrix. True, by row, otherwise by column.
+
+_What does `m[3,]` do?_  
+`m[3,]` will access values listed in the 3rd row of the matrix.
+
+_How can you extract the 3rd, 4th and 5th columns of m together as one object?_
+```{r}
+e <- m[, c(3, 4, 5)]
+e
+```
+
+## Exercise 7
+```{r}
+cbind(m, 101:105)
+```
+_What does the cbind command do?  How about rbind?_
+cbind adds values into the column of the matrix.
+rbind adds values into the row of the matrix.
+
+_Create a new object "n" where the first row is a new row of numbers (your choice) and the following rows are the followed by the m matrix._
+```{r}
+#We are creating a object called n that is a matrix with 1 row x 5 columns 
+n <- matrix(data=c(45, 67, 87, 90, 100),ncol=5,byrow=F)
+
+#Add to the n the values of m matrix
+n <- rbind(n, m)
+n
+```
+
+_Want more? (OPTIONAL) do the same but reverse the order of the rows from m._
+
+## Data Import
+```{r}
+#Import the file into R
+fly.worm <- read.delim("~/Downloads/fly_worm_blast.out.gz", header=F)
+#the header=F tells R that the first row contains data
+#Look at the brief description of the data
+head(fly.worm)
+summary(fly.worm)
+```
+Add the appropriate column names
+```{r}
+colnames(fly.worm) <- c("query_id",
+                        "subject_id",
+                        "pct_ident",
+                        "len",
+                        "mis",
+                        "gaps",
+                        "qb",
+                        "qe",
+                        "sb",
+                        "se",
+                        "E",
+                        "Score")
+
+#Check overview 
+head(fly.worm)
+summary(fly.worm)
+```
+## Exercise 8  
+_How many hits have an e-value of 0?_
+```{r}
+#Create new variable called Evalue and assign column 11 values of the fly.worm data. (column 11 corresponds to E-values)
+#If E value is equal to 0, assign True, if else False
+Evalue <- fly.worm[,11]
+Evalue <- Evalue==0
+sum(Evalue==TRUE)
+```
+2443 hits have an e-value of 0
+
+_How many have hits have a percent identity > 50?_
+```{r}
+#column 3 is percent identity
+percentIdent <- fly.worm[,3]
+percentIdent <- percentIdent>50
+sum(percentIdent)
+```
+5271 hits have a percent identity greater than 50
+
+_Recalculate the above values but in percentage of hits rather than absolute values._
+```{r}
+#There are 34,791 total hits
+EvalPercent <- (2443 / 34791) * 100
+
+PerIdenPercent <- (5271 / 34791) * 100
+
+#Print the result
+EvalPercent
+PerIdenPercent
+```
+~7 percent of all hits have a Evalue of 0  
+~15 percent of all hits have a percent identity greater than 50
+
+_How many hits have an E-value of 0 and have a percent identity less than 50?_
+```{r}
+bothHits = fly.worm[, c(3,11)]
+sum(bothHits["pct_ident"] < 50 & bothHits["E"] == 0)
+
+```
+948 hits have an E-value of 0 and percent identity less than 50.
+
+_What is the minimum percent identity of the hits with an E-value equal to 0?_
+```{r}
+#Create new data frame called newHits that contain values in bothHits that have a percent identity less than 50 and E value equal to 0
+newHits <-bothHits[bothHits["pct_ident"] < 50 & bothHits["E"] == 0,]
+min(newHits[,1])
+
+
+#The long way to solve things, if we didn't have the min function. I made this for loop for fun. 
+minVal <- bothHits[1,1]
+
+#for loop the iterates through every row in bothHits
+for (i in 1:nrow(bothHits)) {
+#if bothHits E value is equal to 0
+  if (bothHits[i,2]==0) {
+#check if the pervious minVal is greater than the new % identity 
+    if (minVal > bothHits[i, 1]) {
+      minVal <- bothHits[i, 1]
+    }
+  }
+}
+minVal
+
+```
+The minimum % identity of the hits with an E-value equal to 0 is 24.07.
+
+## Excercise 9
+_Are you surprised that sequences with relatively low percent identity can still have an E-value of 0?_  
+No it is not that suprising as E-value is the significance of getting a alignment score based on chance alone.
+The percent identity can be lowered by gaps, mismatches, or similar amino acids that can give a positive score but lower sequence identity. 
+
+_State a hypothesis about what alignment properties might produce a zero E-value even when the percent identity is less than 50%._  
+Hypothesis: Even if the amino acids are not identical, similar amino acids can still give a high positive alignment score, and thus a low e-value.
+
+_Test your hypothesis_  
+We will check for the alignment score to confirm the hypothesis that the E-value is 0 even if the % identity is low.
+```{r}
+#This function gives the row number in which the percent identity is less than 50 and E-value is equal to 0
+allscore1 <- which(fly.worm["pct_ident"] < 50 & fly.worm["E"] == 0)
+
+#This function will then sort the alignment scores of the selected rows from highest to lowest and display the 5 highest scores. 
+head(sort(fly.worm[allscore1,12], decreasing = TRUE), n = 5)
+
+#This function gives the row number in which the percent identity is greater than or equal to 50 and E-value is equal to 0
+allscore2 <- which(fly.worm["pct_ident"] >= 50 & fly.worm["E"] == 0)
+
+#This function will then sort the alignment scores of the selected rows from highest to lowest and display the 5 highest scores. 
+head(sort(fly.worm[allscore2,12], decreasing = TRUE), n = 5)
+
+#The overall alignment score averages
+mean(fly.worm[,12])
+
+#The alignment score averages for sequences that have a percent identity lower than 50 and E-value of 0
+mean(fly.worm[allscore1,12])
+
+#The overall alignment score averages for sequences that have a percent identity equal to or greater than 50 and E-value of 0
+mean(fly.worm[allscore2,12])
+
+
+```
+The averages of all alignment scores is 191.1029.   
+The averages of alignment scores of sequences with % identity less than 50 and E-value of 0 is 922.8618  
+The averages of alignment scores of sequences with % identity greater than or equal to 50 and E-value of 0 is 917.0107.  
+The results agree with the hypothesis because a e-value of 0 should correlate to a high alignent score (The definition of e-value is the likelylood of getting a alignment score based off chance). The high alignment score agrees with our hypothesis of similar amino acids producing a high score.
+
+## Excercise 10
+_It sometimes is useful to create a random subset of a large data set like the fly.worm results.  Create a new dataframe `fly.worm.small` that has 1,000 rows taken at random from the larger data set._
+```{r}
+fly.worm.small <- fly.worm[sample(nrow(fly.worm), 1000), ]
+```
+
+## Exercise 11
+```{r}
+stereotypes <- read.csv("~/Downloads/stereotypes.csv", header=T)
+```
+
+_Use the `summary()` and `head()` functions to examine the stereotypes object._
+```{r}
+head(stereotypes)
+summary(stereotypes)
+```
+
+_Record the answers to the "activity break sections" from Ciera's visualiztio tutorial here:_  
+**Activity Break: There are many ways to subset data**  
+_1. Subset the data to only nerds and metalheads_
+```{r}
+nerds_and_metalheads <- subset(stereotypes, population == "nerd" | population == "metalhead")
+```
+_2. Are there more males who binge drink (over 25 a week) and eat over 20 tacos a week in the metal heads of hipster population?_
+```{r}
+metal_m_binge <- subset(stereotypes, population == "metalhead" & gender == "male" & beer > 25 & tacos > 20)
+nrow(metal_m_binge)
+
+hipster_m_binge <- subset(stereotypes, population == "hipster" & gender == "male" & beer > 25 & tacos > 20)
+nrow(hipster_m_binge)
+
+#Hypothesis: there are more male metalhead binge drinkers than hipsters
+nrow(metal_m_binge) > nrow(hipster_m_binge)
+```
+There are 68 male metalhead that binge drink 25+ beers and eat 20+ tacos while there are only 4 male hipster that do so. 
+
+_3. Do male hippies shower more than female nerds?_
+```{r}
+hippie_m_shower <- subset(stereotypes, population == "hippie" & gender == "male" & shower == 0) 
+nrow(hippie_m_shower)
+  
+nerd_f_shower <- subset(stereotypes, population == "nerd" & gender == "female" & shower == 0)
+nrow(nerd_f_shower)
+
+#Hypothesis: there are more male hippies that don't shower at all than female nerds
+nrow(hippie_m_shower) > nrow(nerd_f_shower)
+```
+There are 7 male hippies that do not shower at all, while all female nerds do shower. 
+
+_4. "==" is a equality operator. This expression will evaluate to true if the left thing being compared to the right is identical._
+
+**Activity Break: There are many different geoms in ggplot2**
+```{r}
+#incorporate ggplot2 library
+library(ggplot2)
+```
+_1. View the distribution of showers. Color by population._
+```{r}
+ggplot(data = stereotypes,aes(shower, fill = population)) + geom_histogram(binwidth = 1)
+```
+_2. View the distribution of beer consumption and color by gender._
+```{r}
+ggplot(data = stereotypes, aes(beer,fill = gender)) + geom_histogram(binwidth = 2)
+```
+_3. Find a way to create a plot using the geom violin with the stereotype data set._
+```{r}
+ggplot(stereotypes, aes(population, beer, fill = population)) + geom_violin() 
+```
+
+**Activity Break:**  
+_1. Make a graph that visually describes the difference between beer consumption between gender in the nerd category_
+```{r}
+nerd <- subset(stereotypes, population == "nerd")
+ggplot(nerd, aes(beer, fill = gender)) + geom_density(alpha = I(0.5))
+```
+_2. Using the ggplot2 documentation, explore three different geoms, using either the full data or a subset of the data. Tell me something interesting about the data._
+```{r}
+#This will generate a boxplot for each of the 4 subtypes of the population and their beer consumption
+ggplot(data = stereotypes, aes(x = population, y = beer, fill = population)) + geom_boxplot() + scale_fill_hue(l = 80)
+```
+This graph tells us that metalheads average beer consumption is the highest in comparison to the other population groups. 
+
+```{r}
+hippie <- subset(stereotypes, population == "hippie")
+ggplot(data = hippie, aes(x = age, y = beer)) + geom_smooth(method = 'loess')
+```
+This graphs gives us a line representation that illustrates the relationship between age with drinking beer in the hippie population. The age range from 20 - 21 is associated with highest number of average beer consmption. 
+
+```{r}
+ggplot(stereotypes, aes(x = population, y = shower)) + geom_violin(aes(fill = population))
+```
+This graph gives us a violin graph illustrating the showering habits among the 4 different populations. The results suggest that the nerd population showers the most frequently on average among the 4 different types. 
+
+_3. From yor exploration of the stereotypes data, make three hypothesis about the data_
+
+* The nerd population showers the most
+* The metalhead population drinks the most
+* The hippie population showers the least
+
+**Activity Break:**  
+_1. With the p base layer, make a unique plot by adding additional layers._ 
+```{r}
+p <- ggplot(data = stereotypes, aes(coffee))
+p + geom_histogram(aes(fill = population), binwidth = 2.5) + facet_grid(~population)
+```
+using `fill =` allows us to fill the color of the graph.  
+using `color =` allows us to change the border color of the graph. scal_color_hue() can additionally be used to change the color. 
+
+**Activity Break:**   
+
+_1. Read about and use the following modifers correctly with any portion of the sterotypes dataset you want_  
+_2. Modify color with scale_color_hue()_  
+_3. Make a tricket out boxplot using the stereotypes data. Use at least 3 of the asethetics option available for geom_boxplot._
+
+```{r}
+p <- ggplot(data = stereotypes, aes(x = population, y = coffee))
+p + geom_boxplot(aes(fill = population)) + scale_fill_hue(l = 80) + facet_grid(~gender)
+```
+## Exercise 12
+_Use ggplot to explore the relationship between score ("Score") and alignment length("len").  Provide a plot that illustrates the relationship and describe the relationship in words._
+```{r}
+q <- ggplot(data = fly.worm, aes(x = fly.worm["len"], y = fly.worm["Score"]))
+q + geom_smooth(method = 'gam') + scale_x_continuous() + scale_y_continuous() + xlab("Length") +ylab("Alignment Score")
+```
+As the sequence length increases, the overall trend shows that the score also increases in a linear fashion. This makes sense as increased sequence length correlates with more amino acids being compared to one another.
+
+## Excercise 13
+_While you might expect that BLAST results with long alignments would have high scores, this is not always the case.  Form a hypothesis as to what might influence the relationship between alignment length and score.  Use ggplot to make a new plot to explore this hypothesis.  Does the plot support your hypothesis or not?  State your hypothesis, provide the code for your plot, and state your conclusion._
+
+Long alignments will not always gaurantee a high score. If conserved sequences are compared it will give a high score, however, the longer the sequence the higher chance of having mismatches. Mismatches can thus lower the alignment score. 
+```{r}
+#Create a plot observing the relationship between alignment length and number of mismatches
+lahs <- ggplot(data = fly.worm, aes(x = fly.worm["len"], y = fly.worm["mis"]))
+lahs + geom_smooth(method = 'gam') + geom_point() + xlab("Alignment Length") + ylab("Mismatch") + scale_x_continuous() + scale_y_continuous()
+```
+From the graph we are able to observe a linear relationship between alignment length and number of mismatches, thus supporting my hypothesis. 
+
+**Turning in the assignment**
+
+* Click the "Preview" Button to generate an up-to-date html version of your notebook. Check it to make sure you are happy with its content.
+* add your .Rmd and .nb.html files to the repository and commit the changes.
+* push the changes

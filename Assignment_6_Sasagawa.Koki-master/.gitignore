@@ -1,0 +1,13 @@
+*.gff
+*fastqc.zip
+*.fastq.gz
+*.bt2
+*.fq
+*.fa
+*.fa.gz
+*.bam
+*.bai
+*.vcf
+*.fastq
+*.sam
+*.sai
