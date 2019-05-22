@@ -8,7 +8,6 @@ Notes: **Trimmomatic**, is a program that filters reads based on quality scores 
 
 Insert answers to Illumina exercises 1 - 7 here.  Submit this .md by git.
 
-
 **Exercise 1:**
 
 __a__ What is the read length? (can you do this without manually counting?)
@@ -39,9 +38,9 @@ __d__ Are the quality scores Phred+33 or Phred+64? (how did you figure this out?
 
 > Our perbase sequence content is skewed due to the high occurance of T on position 6 in the early part of our sequence. (first 10bp repeats) Perhaps this region contains an adapter that is attached to the beginning of all of our illumina reads.  
 
-> Our kmer content is skewed to show a high occurance of repeats in the beginning of our reads. The kmer is a 7 nucleotide sequence read, which is localizing starting mostly from the positon 2 nucleotide. Kmer is a subsequence derived from a read obtained through DNA sequencing. The fastqc is showing us the kmers with positionally biased enrichment. These repeatedly appearing sequences are probably due to adapters added to the beginning of illumina reads such as a barcode.
+> Our kmer content is skewed to show a high occurrence of repeats in the beginning of our reads. The kmer is a 7 nucleotide sequence read, which is localizing starting mostly from the position 2 nucleotide. Kmer is a subsequence derived from a read obtained through DNA sequencing. The fastqc is showing us the kmers with positionally biased enrichment. These repeatedly appearing sequences are probably due to adapters added to the beginning of illumina reads such as a barcode.
 
-**Exercise 3:**Take a look at the trimmomatic web page and user manual and figure out how to modify the command below to clip after the average read quality across 4 bases drops to 20 or less. AND only retain reads where the trimmed length is 50bp or more.
+**Exercise 3:** Take a look at the trimmomatic web page and user manual and figure out how to modify the command below to clip after the average read quality across 4 bases drops to 20 or less. AND only retain reads where the trimmed length is 50bp or more.
 
 Results of trim:
 
@@ -125,7 +124,7 @@ __a__ Can you distinguish likely SNPs from sequencing/alignment errors? How?
 
 __b__ Go to A01:15,660,359-15,665,048 (you can cut and paste this into the viewer and press “Go”. For each of the the three genes in this region: does the annotation (in blue) appear to be correct or incorrect? If incorrect, describe what is wrong
 
-> The annotation in blue appear to be correct as the reads are aligning to the anotated region. However, there are reads that align outside the annotated region. Perhaps these are isoforms (exons) the reference annotated genome did not contain, or annotation errors in the reference genome. 
+> The annotation in blue appear to be correct as the reads are aligning to the annotated region. However, there are reads that align outside the annotated region. Perhaps these are isoforms (exons) the reference annotated genome did not contain, or annotation errors in the reference genome. 
 
 *GMT* -0.5 which genes were better than others in annotation? 
 
@@ -134,8 +133,8 @@ Patterns that are seen often in my data. The barcodes are kind of like kmers (5 
 
 Illumina tends to have increased low quality reads towards the end. 
 
-Why aren't adapters ommitted in the trimming? 
-the barcode (unique identifer of reads to sequence libaray) is sometimes included as part of the "adapter". 
+Why aren't adapters committed in the trimming? 
+the barcode (unique identifier of reads to sequence library) is sometimes included as part of the "adapter". 
 
 Why are some reads not match barcodes? 
 low quality reads at those regions.
