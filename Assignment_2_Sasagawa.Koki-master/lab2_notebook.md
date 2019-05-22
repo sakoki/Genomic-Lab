@@ -1,7 +1,5 @@
 4/13/2017
 
-FISH
-
 **Create variables by typing:** set variable1 variable2 variable3 ... variableN
 
 **for loops have 3 parts:**
@@ -60,9 +58,7 @@ Preceed it with \
       echo \"(cat #file)\"
     end
 
-**Optional Exercise 4:**
-
-**Exercise 5:**
+**Exercise 4:**
 
 Pseudo loop:
 Make a variable named scoringMatrix with EBLOSUM45, EBLOSUM62, EBLOSUM80
@@ -83,7 +79,7 @@ BLAST for paralogs and orthologs
 
 Ortholog is defined as the best reciprocal match between proteomes. After finding the best match, that protein must also match back to that same protein in a reverse test.
 
-Calculated in lab1 we found out that performing a water on two proteomes would take too long. blastp will allow us to perform this without taking too long.
+Calculated in lab1 we found out that performing a water on two proteomes would take too long. blastp will allow us to perform this much faster.
 
 Format the BLAST database by typing:
 
@@ -121,13 +117,13 @@ The speed of our blast depends on the parameters set on blast. The default word 
 |	Threshold | Time |
 |:---------:|:-----:|
 | 10        |0:01.10|
-| 11				|0.00.71|
+| 11		|0.00.71|
 | 12        |0.00.50|
 | 13        |0.00.39|
 | 14        |0.00.32|
 | 15        |0.00.30|
 
-The smaller the threshold, the longer time it takes due to more hits that blastp will bring back. Threshold bascially designates the amount of amino acids that must match in a row to continue extending an alignment
+The smaller the threshold, the longer time it takes due to more hits that blastp will bring back. Threshold basically designates the amount of amino acids that must match in a row to continue extending an alignment
 
 Change the output format by typing in:
 
@@ -176,10 +172,10 @@ We selected paralog candidates by observing 4 criteria of each protein.
 |B0213.15b|775|0|70%|
 |B0213.14 |755|0|71%|
 
-If the protein has a low e-value, you know the alignment score was significant. We then observed the % identity to see how much similarity our candidate protein has in relation with our aligned protein. An additional evaluation was preformed by visually obsering the amino acid alignment. This is to validate the % identity and check that alignment matches were spreadout over the entire amnio acid sequence.
+If the protein has a low e-value, you know the alignment score was significant. We then observed the % identity to see how much similarity our candidate protein has in relation with our aligned protein. An additional evaluation was preformed by visually observing the amino acid alignment. This is to validate the % identity and check that alignment matches were spread-out over the entire amnio acid sequence.
 
 BLOSSUM 80
 BLOSSUM 62
 BLOSSUM 45
 
-we would want to use BLOSSUM 80 for comparing very closely related sequeces as we want matches to score high and mismatches to be heavily penalized. When comparing distant proteins together we don't want to use BLOSSUM 80 as mismatches would be penalized too heavily the scores we get would be scewed to be negative. Instead, we would want to use BLOSSUM 45 so that we can get a better result on seeing which proteins are closely related. For example, BLOSSUM 80 will be useful for comparing related sequences, as BLOSSUM 45 would be more better suited for comparing distant proteins.
+we would want to use BLOSSUM 80 for comparing very closely related sequences as we want matches to score high and mismatches to be heavily penalized. When comparing distant proteins together we don't want to use BLOSSUM 80 as mismatches would be penalized too heavily the scores we get would be scewed to be negative. Instead, we would want to use BLOSSUM 45 so that we can get a better result on seeing which proteins are closely related. For example, BLOSSUM 80 will be useful for comparing related sequences, as BLOSSUM 45 would be more better suited for comparing distant proteins.

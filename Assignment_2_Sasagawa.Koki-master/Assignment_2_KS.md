@@ -32,7 +32,7 @@ changing the threshold change the search time?
 |	Threshold | Time |
 |:---------:|:-----:|
 | 10        |0:01.10|
-| 11				|0.00.71|
+| 11		|0.00.71|
 | 12        |0.00.50|
 | 13        |0.00.39|
 | 14        |0.00.32|
@@ -54,7 +54,7 @@ blastp is significantly faster than water.
 __Q5__.  What search parameters (matrix and threshold) would you use to
 search two proteomes? Justify your answer.
 
-What parameters I decide to use will ultimately depend on what kind of proteomes I am looking to compare. If I am comparing the proteomes of two closely related species I would want to use a BLOSUM80 matrix with a threshold value of 15 to get a stricter alignment. When comparing two distantly related species I would probably want to use BLOSUM45 matrix and run the blastp using a threshold value of 10. This is because if we make the conditions too strick we may fail to catch sequences that have diverged alot. Something to keep in mind is the time it takes to preforms these alignments. If time is an issue (ex: proteomes are too large) using less strict conditions will not be favorable as it will cause the blastp search to take much longer due to increased alignment hits.
+What parameters I decide to use will ultimately depend on what kind of proteomes I am looking to compare. If I am comparing the proteomes of two closely related species I would want to use a BLOSUM80 matrix with a threshold value of 15 to get a stricter alignment. When comparing two distantly related species I would probably want to use BLOSUM45 matrix and run the blastp using a threshold value of 10. This is because if we make the conditions too strict we may fail to catch sequences that have diverged a lot. Something to keep in mind is the time it takes to preforms these alignments. If time is an issue (ex: proteomes are too large) using less strict conditions will not be favorable as it will cause the blastp search to take much longer due to increased alignment hits.
 
 __Q6__.  How long will it take to search two proteomes (given the above)?
 
@@ -99,5 +99,3 @@ Alignment score alone is not sufficient for determining orthology or paralogy. O
 Additionally, an evolutionary tree diagram will allow us to follow evolutionary events and determine whether a gene is orthologous or paralogous by refering to speciation or gene duplication events. To compare the molecular homology, we can perform a deep homology and study the evolutionary relationships between two organism based off their transcriptomes.
 
 To add another layer of analysis, we could perform an experiment to knockout the paralogous or orthologous protein and study the change in phenotype. This will allow us to study any redundancy in function, or if the protein is essential.
-
-Add and commit changes for both this document and your lab notebook to the repository.  Push to GitHub and set an issue to indicate that you are ready for this to be graded.
