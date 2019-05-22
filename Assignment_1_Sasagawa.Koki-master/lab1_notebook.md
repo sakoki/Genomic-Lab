@@ -1,4 +1,4 @@
-## **Lab1 notebook**
+composition## **Lab1 notebook**
 
 |Species|File Size (only genome)|# of Chromosomes (not including mito or chloro)|Genome Size|# of Protein-coding genes|Ave Protein Length|
 |:------|:-------:|:---------:|:---------:|:------------:|:---------:|
@@ -20,7 +20,7 @@ Calculating Average Protein Size:
 * **Count # of newline characters:** grep -v ">" protein.fa | wc -l
 * **Average Protein Size:** (# of Amino Acids - # of newline) / (# of proteins)
 
-### Sequnce alignment Part 3
+### Sequence Alignment Part 3
 
 Making text files containing only the 1st protein:
 
@@ -46,7 +46,7 @@ They look similar, what is the difference? To answer this question use Unix comm
 
     diff ce1.fa ce1.shuffle.fa
 
-diff reports lines that are diffrent. If nothing is returned, it means the lines were not different. Re-shuffling and preforming an alignment gives us a different result. Lets repeat this 1000 times:
+diff reports lines that are different. If nothing is returned, it means the lines were not different. Re-shuffling and preforming an alignment gives us a different result. Lets repeat this 1000 times:
 
     shuffleseq ce1.fa -outseq ce1.shuffle.fa -shuffle 1000
     water at1.fa ce1.shuffle.fa -gapopen 10 -gapextend 5 -outfile 1k.water
@@ -58,7 +58,7 @@ To count the unique scores:
 * -d " " option to tell it that our fields split on spaces
 * -f 3 option to tell we want the 3rd column
 
-awk can be used to calculate the average. This is very complicated to explain.
+awk can be used to calculate the average.
 
     grep Score 1k.water | awk '{sum+=$3} END {print sum/NR}'
 
@@ -66,12 +66,12 @@ awk can be used to calculate the average. This is very complicated to explain.
 The shape of my curve is not normal as it dips in the middle. Normally we would expect a normal distribution or Gaussian Curve.
 
 **2. Do you expect all protein comparisons to have the same distribution?**
-If the original sequnces being compared have a high similarity in compositon a higher match score is expected and a normal distribution skewed to the right side. If the original sequences have low similarity in composition a lower match score is expected and a normal distribution skewed to the left.
+If the original sequences being compared have a high similarity in composition a higher match score is expected and a normal distribution skewed to the right side. If the original sequences have low similarity in composition a lower match score is expected and a normal distribution skewed to the left.
 
 **3. How would protein composition and length affect the scores?**
-The protein composition directly affects the scores as we are comparing the amino acids sequences. When the amino acid composition is patterend, such as GC or AT repeats, the longer length will lead to a higher score. If the composition is random, the longer length will lead to a lower score.
+The protein composition directly affects the scores as we are comparing the amino acids sequences. When the amino acid composition is patterned, such as GC or AT repeats, the longer length will lead to a higher score. If the composition is random, the longer length will lead to a lower score.
 
-**4. How would the scoring matrix and gap penalites affect the scores?**
+**4. How would the scoring matrix and gap penalties affect the scores?**
 In a scoring matrix, some are made with closer related sequences while others are made using more distance sequences. This can affect how much substitution or adding gaps is penalized.
 
 **5. How might real sequences be different from random?**
@@ -108,7 +108,7 @@ It will take a very long amount of time. To compare 1 protein (B0213.10) against
 
 Find the protein B0213.10 by opening the C.elegan protein.fa file. Then search for the protein by typing /B0213.10.
 
-Find the protein amino acid length by typing to the commandline:
+Find the protein amino acid length by typing to the command-line:
 
     cat B0213.10.fa | wc -m
 
@@ -140,5 +140,5 @@ calculate the average
 
 The averaged scores of comparing our protein of interest with the randomly shuffled ortholog sequences was 35.954
 
-The original sequence alignment score of our protein of iterest with the predicted ortholog was 337, which is significantly higher than the average score of 35.954.
+The original sequence alignment score of our protein of interest with the predicted ortholog was 337, which is significantly higher than the average score of 35.954.
 It makes sense the score of alignment is very high because it is a family of cytochrome p450 proteins which are liver enzymes involved with metabolism.
